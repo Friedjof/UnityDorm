@@ -1,8 +1,9 @@
 import uuid
 
+from django.conf import settings
 from django.urls import path, register_converter
 
-from .views import index, article
+from .views import index, article, media
 
 
 class UUIDConverter:
@@ -23,3 +24,6 @@ urlpatterns = [
     path('', index, name='index'),
     path('article/<uuid:identifier>/', article, name='article'),
 ]
+
+if not settings.DEBUG:
+    urlpatterns.append(path('media/<path:path>', media, name='media'))
