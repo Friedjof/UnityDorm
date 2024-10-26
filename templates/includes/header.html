@@ -1,0 +1,15 @@
+{% load static %}
+
+<header class="unitydorm-header">
+    <div class="row align-items-center text-white mx-2">
+        <div class="col-auto m-0 p-1">
+            <a href="/">
+                <img src="{% static 'media/favicon.webp' %}" class="unitydorm-image" alt="Icon">
+            </a>
+        </div>
+        <div class="col text-start m-0 px-2">
+            <h1 class="mb-1">{{ title }}</h1>
+            <p class="lead mb-0">{{ description }}</p>
+        </div>
+    </div>
+</header>

@@ -1,0 +1,35 @@
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    background-color: #f0c66e;
+    font-family: 'Arial', sans-serif;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.container {
+    text-align: center;
+    flex: 1;
+    padding: 10px;
+}
+
+.row {
+    display: flex;
+    justify-content: center;
+}
+
+.top-right-corner {
+    position: absolute;
+    top: -3px;
+    right: -3px;
+    z-index: 2;
+}

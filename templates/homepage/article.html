@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ article.title }}{% endblock %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'css/article.css' %}">
+
+    <style>
+        .article-header {
+            background: url("{{ article.image.url }}") no-repeat center center fixed;
+        }
+    </style>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{% static 'js/article.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+    <div class="article-image-viewer" id="article-image-viewer">
+        <img src="{{ article.image.url }}" alt="{{ article.title }}" class="article-image">
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-8 article-header" id="article-header">
+                <span class="news-category" style="background: {{ article.category.background }}; color: {{ article.category.color }}">{{ article.category }}</span>
+            </div>
+            <div class="col-md-8 article-subheader">
+                <h1 class="article-title">{{ article.title }}</h1>
+                <h2 class="article-description">{{ article.description }}</h2>
+            </div>
+            <div class="col-md-8 article-content">
+                {{ content|safe }}
+            </div>
+        </div>
+    </div>
+{% endblock %}

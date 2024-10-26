@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ article.title }}{% endblock %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'css/article.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="article-container">
+        <div class="row">
+            <div class="col-md-11 article-header">
+                <img src="{{ article.image.url }}" alt="{{ article.title }}" class="article-image">
+                <h1>{{ article.title }}</h1>
+                <p class="article-date">{{ article.date }}</p>
+            </div>
+            <div class="col-md-11 article-content">
+                <p class="article-description">{{ article.description }}</p>
+                <p class="article-text">{{ article.text }}</p>
+            </div>
+        </div>
+    </div>
+{% endblock %}

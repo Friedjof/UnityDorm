@@ -1,0 +1,15 @@
+db.sqlite3
+db.sqlite3-journal
+
+data/
+
+uploads/*
+!uploads/.gitkeep
+
+.venv/
+
+.idea/
+
+*.pyc
+
+*.env

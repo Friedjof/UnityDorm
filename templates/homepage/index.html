@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'css/homepage.css' %}">
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{% static 'js/homepage.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-11 unitydorm-shortcuts-header">
+                <h2>UnityDorm Shortcuts</h2>
+            </div>
+            {% for shortcut in shortcuts %}
+                <div class="col-md-3 unity-shortcut" id="shortcut-{{ forloop.counter }}" style="background: {{ shortcut.background }}; color: {{ shortcut.color }}"
+                     data-shortcut-url="{{ shortcut.url }}" data-shortcut-new-tab="{{ shortcut.new_tab }}">
+                    <img src="{{ shortcut.image.url }}" alt="{{ shortcut.title }}" class="unity-shortcut-image">
+                    <p class="unity-shortcut-name">{{ shortcut.title }}</p>
+                    <i class="fas fa-external-link-alt link-icon"></i>
+                </div>
+            {% endfor %}
+        </div>
+        <div class="row">
+            <div class="col-md-11 unitydorm-shortcuts-header">
+                <h2>UnityDorm Articles</h2>
+            </div>
+            <div class="col-md-11 unitydorm-news">
+                <div class="unitydorm-news-carousel">
+                    <button class="carousel-arrow left">&#10094;</button>
+
+                    <div class="news-items-wrapper">
+                        {% for article in articles %}
+                            <div class="news-item-container" data-news-identifier="{{ article.identifier }}">
+                                <div class="unitydorm-news-item">
+                                    <span class="news-category" style="background: {{ article.category.background }}; color: {{ article.category.color }}">{{ article.category }}</span>
+                                    <img src="{{ article.image.url }}" alt="{{ article.title }}" class="news-image">
+                                    
+                                    <h2 class="news-title">{{ article.title }}</h2>
+                                    <p class="news-description">{{ article.description }}</p>
+                                    <p class="news-date">{{ article.date }}</p>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <button class="carousel-arrow right">&#10095;</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
