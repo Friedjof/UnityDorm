@@ -24,7 +24,7 @@ COPY . .
 
 # Create a directory for the SQLite database
 RUN mkdir -p /data
-VOLUME ["/data"]
+VOLUME ["/data", "/app/uploads"]
 
 # Set environment variable for database path
 ENV SQLITE_PATH=/data/db.sqlite3
