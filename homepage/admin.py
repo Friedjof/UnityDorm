@@ -10,6 +10,8 @@ class ShortcutResource(resources.ModelResource):
     class Meta:
         model = Shortcut
         fields = ('identifier', 'order', 'title', 'url', 'image', 'new_tab', 'color', 'background')
+        import_id_fields = ('identifier',)
+        export_order = ('identifier', 'order', 'title', 'url', 'image', 'new_tab', 'color', 'background')
 
 
 # Register your models here.
@@ -26,6 +28,8 @@ class ArticleCategoryResource(resources.ModelResource):
     class Meta:
         model = ArticleCategory
         fields = ('identifier', 'name', 'color', 'background')
+        import_id_fields = ('identifier',)
+        export_order = ('identifier', 'name', 'color', 'background')
 
 
 @admin.register(ArticleCategory)
@@ -41,6 +45,8 @@ class ArticleResource(resources.ModelResource):
     class Meta:
         model = Article
         fields = ('identifier', 'title', 'description', 'article', 'image', 'date', 'category')
+        import_id_fields = ('identifier',)
+        export_order = ('identifier', 'title', 'description', 'article', 'image', 'date', 'category')
 
 
 @admin.register(Article)
