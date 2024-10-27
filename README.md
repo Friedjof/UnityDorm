@@ -34,7 +34,7 @@ _This screenshot shows the homepage with shortcuts and blog articles, an article
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/YourUsername/UnityDorm.git
+   git clone https://github.com/Friedjof/UnityDorm.git
    ```
 2. Install the required dependencies:
    ```bash
