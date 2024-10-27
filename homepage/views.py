@@ -1,5 +1,5 @@
 import os
-import mimetypes
+from PIL import Image
 
 from django.shortcuts import render
 from django.conf import settings
@@ -35,10 +35,11 @@ def media(request, path):
         raise Http404("Media not found")
 
     if os.path.exists(media_path):
-        mime_type, _ = mimetypes.guess_type(media_path)
-        if mime_type and mime_type.startswith('image/'):
+        try:
+            with Image.open(media_path) as img:
+                img.verify()  # Verify that this is an image
             return FileResponse(open(media_path, 'rb'))
-        else:
+        except (IOError, SyntaxError) as e:
             raise Http404("Media not found")
     else:
         raise Http404("Media not found")
