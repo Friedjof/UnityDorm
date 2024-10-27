@@ -43,7 +43,7 @@
                                     
                                     <h2 class="news-title">{{ article.title }}</h2>
                                     <p class="news-description">{{ article.description }}</p>
-                                    <p class="news-date">{{ article.date }}</p>
+                                    <p class="news-date">{{ article.date|date:"M. d, Y" }}</p>
                                 </div>
                             </div>
                         {% endfor %}

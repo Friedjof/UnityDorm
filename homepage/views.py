@@ -10,11 +10,12 @@ from markdown import markdown
 
 from .models import Shortcut, Article
 
+
 def index(request):
     return render(request, 'homepage/index.html', {
         'title': 'Welcome to UnityDorm',
         'shortcuts': Shortcut.objects.all().order_by('order'),
-        'articles': Article.objects.all().order_by('-date')[:10]
+        'articles': Article.objects.filter(published=True).order_by('-date')[:10]
     })
 
 

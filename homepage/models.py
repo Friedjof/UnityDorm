@@ -41,7 +41,8 @@ class Article(models.Model):
     article = models.TextField()
 
     image = models.ImageField(upload_to='news/', null=True, blank=True)
-    date = models.DateField(auto_now_add=True)
+    date = models.DateTimeField(auto_now_add=True)
+    published = models.BooleanField(default=False)
 
     category = models.ForeignKey(ArticleCategory, on_delete=models.CASCADE)
 

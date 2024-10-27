@@ -49,6 +49,46 @@ _This screenshot shows the homepage with shortcuts and blog articles, an article
    python manage.py runserver
    ```
 
+## `.env` Configuration 🛠️
+```bash
+DJANGO_SECRET_KEY='<your_secret_key>'          # Generate a new secret key
+DJANGO_DEBUG='True'                            # Set to 'False' in production
+DJANGO_ALLOWED_HOSTS='<your_domain>,localhost' # Add your domain here (comma-separated values)
+DJANGO_SUPERUSER_USERNAME='<your_username>'    # Create a superuser with these credentials
+DJANGO_SUPERUSER_EMAIL='<your_email>'          # (for accessing the admin interface)
+DJANGO_SUPERUSER_PASSWORD='<your_password>'    # (use a strong password)
+TLS_ACTIVE='True'                              # Set to 'False' to disable HTTPS
+```
+
+## Docker 🐳
+
+You can use the prebuilt Docker image from the GitHub Container Registry:
+
+```bash
+docker pull ghcr.io/friedjof/unitydorm:latest
+```
+
+Here is an example `docker-compose.yml` configuration:
+```yaml
+services:
+  unitydorm:
+    image: ghcr.io/friedjof/unitydorm:latest
+    ports:
+      - "8000:8000"
+    environment:
+      - DJANGO_SECRET_KEY='<your_secret_key>'
+      - DJANGO_DEBUG='True'
+      - DJANGO_ALLOWED_HOSTS='<your_domain>,localhost'
+      - DJANGO_SUPERUSER_USERNAME='<your_username>'
+      - DJANGO_SUPERUSER_EMAIL='<your_email>'
+      - DJANGO_SUPERUSER_PASSWORD='<your_password>'
+      - TLS_ACTIVE='True'
+    volumes:
+        - ./data:/data
+        - ./uploads:/uploads
+    restart: always
+```
+
 ## Usage 🖥️
 
 - **Admin Interface**: The admin interface allows you to manage shortcuts and blog articles. Log in at `/admin` to add shortcuts or create and edit blog articles.
