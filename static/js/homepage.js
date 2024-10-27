@@ -28,6 +28,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Karussell-Code
     let currentIndex = 0;
+    let direction = 1; // 1 for right, -1 for left
+    let autoSlideInterval;
+    let autoSlideTimeout;
 
     function getItemsPerSlide() {
         return window.innerWidth >= 768 ? 4 : 1;
@@ -73,31 +76,66 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (currentIndex < maxIndex) {
             currentIndex++;
-            updateCarousel();
+        } else {
+            direction = -1; // Change direction to left
+            currentIndex--;
         }
+        updateCarousel();
     }
 
     function showPrevious() {
         if (currentIndex > 0) {
             currentIndex--;
-            updateCarousel();
+        } else {
+            direction = 1; // Change direction to right
+            currentIndex++;
         }
+        updateCarousel();
+    }
+
+    function autoSlide() {
+        if (direction === 1) {
+            showNext();
+        } else {
+            showPrevious();
+        }
+    }
+
+    function startAutoSlide() {
+        const itemsPerRow = getItemsPerSlide();
+        const totalItems = document.querySelectorAll('.news-item-container').length;
+        if ((window.innerWidth >= 768 && totalItems > 4) || (window.innerWidth < 768 && totalItems > 1)) {
+            autoSlideInterval = setInterval(autoSlide, 6000); // Slide every 6 seconds
+        }
+    }
+
+    function stopAutoSlide() {
+        clearInterval(autoSlideInterval);
+        clearTimeout(autoSlideTimeout);
+        autoSlideTimeout = setTimeout(startAutoSlide, 20000); // Restart auto-slide after 20 seconds of inactivity
     }
 
     window.addEventListener('resize', updateCarousel);
 
     // Initialisiere das Karussell nach dem Laden der Seite
     updateCarousel();
+    startAutoSlide();
 
     // Event Listener für die Karussell-Pfeile
     const nextButton = document.querySelector('.carousel-arrow.right');
     const prevButton = document.querySelector('.carousel-arrow.left');
 
     if (nextButton) {
-        nextButton.addEventListener('click', showNext);
+        nextButton.addEventListener('click', function() {
+            showNext();
+            stopAutoSlide();
+        });
     }
 
     if (prevButton) {
-        prevButton.addEventListener('click', showPrevious);
+        prevButton.addEventListener('click', function() {
+            showPrevious();
+            stopAutoSlide();
+        });
     }
 });
