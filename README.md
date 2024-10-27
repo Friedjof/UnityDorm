@@ -2,6 +2,8 @@
 
 UnityDorm is a simple landing page and blog platform designed as a central hub for community members. Users can create "shortcuts" displayed as small icons in the upper section to quickly access frequently used links. Additionally, there is a feature for writing and publishing blog articles.
 
+> **Note**: This is in development and may have bugs or incomplete features. Feel free to contribute to the project by submitting pull requests or issues.
+
 ## Features ✨
 
 ### 1. Shortcuts 🚀
@@ -14,16 +16,19 @@ UnityDorm is a simple landing page and blog platform designed as a central hub f
 - **Customization**: Blog articles have a title, a short description, and detailed content. An image and a category can be added for each post.
 - **Purpose**: The blog feature provides a platform for sharing news, opinions, or other content with the community.
 
+> **The article text** can be written in Markdown format, allowing for easy formatting and styling. Then the content is rendered as HTML on the frontend.
+
 ## Screenshots 📸
 
-![Landing Page](screenshots/landingpage.png)
-*Landing page with shortcut section and blog articles.*
+<table>
+  <tr>
+    <td><img src="media/screenshots/demo-home.png" alt="Homepage" width="300"/></td>
+    <td><img src="media/screenshots/demo-article-top.png" alt="Article" width="300"/></td>
+    <td><img src="media/screenshots/demo-admin-panel-articles.png" alt="Admin" width="300"/></td>
+  </tr>
+</table>
 
-![Blog Article Detail View](screenshots/blog_detail.png)
-*Detail view of a blog article.*
-
-![Admin Panel](screenshots/admin.png)
-*Admin panel for managing shortcuts and articles.*
+_This screenshot shows the homepage with shortcuts and blog articles, an article with detailed content, and the admin panel for managing articles._
 
 ## Installation ⚙️
 
