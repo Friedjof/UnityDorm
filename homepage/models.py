@@ -1,4 +1,5 @@
 from uuid import uuid4
+from datetime import datetime
 
 from django.db import models
 
@@ -21,6 +22,15 @@ class Shortcut(models.Model):
         return self.title
 
 
+class Author(models.Model):
+    user = models.OneToOneField('auth.User', on_delete=models.CASCADE)
+
+    registered = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.user.username
+
+
 class ArticleCategory(models.Model):
     identifier = models.UUIDField(primary_key=True, default=uuid4, editable=False)
 
@@ -36,6 +46,8 @@ class ArticleCategory(models.Model):
 class Article(models.Model):
     identifier = models.UUIDField(primary_key=True, default=uuid4, editable=False)
 
+    authors = models.ManyToManyField(Author)
+
     title = models.CharField(max_length=42)
     description = models.CharField(max_length=128)
     article = models.TextField()
@@ -45,6 +57,12 @@ class Article(models.Model):
     published = models.BooleanField(default=False)
 
     category = models.ForeignKey(ArticleCategory, on_delete=models.CASCADE)
+
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True, editable=False, null=True)
+    updated_at = models.DateTimeField(auto_now=True, db_index=True, editable=False, null=True)
+
+    def is_author(self, user):
+        return self.authors.filter(user=user).exists()
 
     def __str__(self):
         return self.title

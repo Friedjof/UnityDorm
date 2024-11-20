@@ -6,7 +6,7 @@ from django.urls import reverse
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
-from .models import Shortcut, Article, ArticleCategory
+from .models import Shortcut, Article, ArticleCategory, Author
 
 
 class ShortcutResource(resources.ModelResource):
@@ -27,6 +27,18 @@ class ShortcutAdmin(ImportExportModelAdmin):
     ordering = ('order',)
     list_filter = ('new_tab',)
 
+    def has_change_permission(self, request, obj=None):
+        if obj is not None:
+            if request.user.is_superuser:
+                return True
+            return False
+        return super().has_change_permission(request, obj)
+
+    def has_view_permission(self, request, obj=None):
+        if obj is not None:
+            return True
+        return super().has_view_permission(request, obj)
+
 
 class ArticleCategoryResource(resources.ModelResource):
     class Meta:
@@ -43,6 +55,37 @@ class ArticleCategoryAdmin(ImportExportModelAdmin):
     list_display = ('name', 'color', 'background')
     search_fields = ('name',)
     ordering = ('name',)
+
+    def has_change_permission(self, request, obj=None):
+        if obj is not None:
+            if request.user.is_superuser:
+                return True
+            return False
+        return super().has_change_permission(request, obj)
+
+    def has_view_permission(self, request, obj=None):
+        if obj is not None:
+            return True
+        return super().has_view_permission(request, obj)
+
+
+@admin.register(Author)
+class AuthorAdmin(admin.ModelAdmin):
+    list_display = ('user', 'registered')
+    search_fields = ('user__username', 'user__email')
+    ordering = ('-registered',)
+
+    def has_change_permission(self, request, obj=None):
+        if obj is not None:
+            if request.user.is_superuser:
+                return True
+            return False
+        return super().has_change_permission(request, obj)
+
+    def has_view_permission(self, request, obj=None):
+        if obj is not None:
+            return True
+        return super().has_view_permission(request, obj)
 
 
 class ArticleResource(resources.ModelResource):
@@ -74,3 +117,15 @@ class ArticleAdmin(ImportExportModelAdmin):
         self.message_user(request, f'{updated_count} articles were successfully marked as published.')
 
     publish_articles.short_description = 'Publish selected articles'
+
+    def has_change_permission(self, request, obj=None):
+        if obj is not None:
+            if request.user.is_superuser or obj.is_author(request.user):
+                return True
+            return False
+        return super().has_change_permission(request, obj)
+
+    def has_view_permission(self, request, obj=None):
+        if obj is not None:
+            return True
+        return super().has_view_permission(request, obj)
