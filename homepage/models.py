@@ -3,7 +3,7 @@ from datetime import datetime
 
 from django.db import models
 
-from .validators import validate_hex_color
+from .validators import validate_hex_color, validate_image_upload
 
 # Create your models here.
 class Shortcut(models.Model):
@@ -12,7 +12,9 @@ class Shortcut(models.Model):
 
     title = models.CharField(max_length=24)
     url = models.URLField()
-    image = models.ImageField(upload_to='shortcuts/', null=True, blank=True)
+    image = models.ImageField(
+        upload_to='shortcuts/', null=True, blank=True, validators=[validate_image_upload]
+    )
     new_tab = models.BooleanField(default=False)
 
     color = models.CharField(max_length=7, default='#000000', validators=[validate_hex_color])
@@ -52,7 +54,9 @@ class Article(models.Model):
     description = models.CharField(max_length=128)
     article = models.TextField()
 
-    image = models.ImageField(upload_to='news/', null=True, blank=True)
+    image = models.ImageField(
+        upload_to='news/', null=True, blank=True, validators=[validate_image_upload]
+    )
     date = models.DateTimeField(auto_now_add=True)
     published = models.BooleanField(default=False)
 

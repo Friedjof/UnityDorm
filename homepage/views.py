@@ -1,9 +1,15 @@
 import os
-from PIL import Image
+import mimetypes
+import re
 
 from django.shortcuts import render
 from django.conf import settings
+from django.core.exceptions import SuspiciousFileOperation
 from django.http import FileResponse, Http404
+from django.shortcuts import get_object_or_404
+from django.utils._os import safe_join
+from django.utils.cache import patch_cache_control
+from django.views.decorators.http import require_GET
 
 import bleach
 from markdown import markdown
@@ -15,34 +21,57 @@ def index(request):
     return render(request, 'homepage/index.html', {
         'title': 'Welcome to UnityDorm',
         'shortcuts': Shortcut.objects.all().order_by('order'),
-        'articles': Article.objects.filter(published=True).order_by('-date')[:10]
+        'articles': Article.objects.filter(published=True).select_related('category').order_by('-date')[:10]
     })
 
 
 def article(request, identifier):
-    try:
-        a = Article.objects.get(identifier=identifier)
-    except Article.DoesNotExist:
-        return render(request, 'homepage/404.html', {'title': 'Article not found'})
+    a = get_object_or_404(
+        Article.objects.select_related('category'),
+        identifier=identifier,
+        published=True,
+    )
+    rendered_markdown = markdown(a.article)
+    clean_content = bleach.clean(
+        rendered_markdown,
+        tags=[
+            'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'strong', 'em', 'u', 's',
+            'a', 'img', 'ul', 'ol', 'li', 'blockquote', 'code', 'pre', 'br', 'hr',
+        ],
+        attributes={
+            'a': ['href', 'title'],
+            'img': ['src', 'alt', 'title'],
+        },
+        protocols={'http', 'https', 'mailto'},
+        strip=True,
+    )
+    clean_content = re.sub(
+        r'<img(?=\s)',
+        '<img loading="lazy" decoding="async" referrerpolicy="no-referrer"',
+        clean_content,
+    )
 
     return render(request, 'homepage/article.html', {
         'article': a, 'title': a.title,
-        'content': markdown(bleach.clean(a.article, tags=['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'strong', 'em', 'u', 's', 'a', 'img', 'ul', 'ol', 'li', 'blockquote', 'code', 'pre'], attributes={'a': ['href'], 'img': ['src', 'alt']}))
+        'content': clean_content,
     })
 
 
+@require_GET
 def media(request, path):
-    media_path = os.path.normpath(os.path.join(settings.MEDIA_ROOT, path))
-
-    if os.path.commonpath([media_path, settings.MEDIA_ROOT]) != str(settings.MEDIA_ROOT):
+    try:
+        media_path = safe_join(settings.MEDIA_ROOT, path)
+    except (SuspiciousFileOperation, ValueError):
         raise Http404("Media not found")
 
-    if os.path.exists(media_path):
-        try:
-            with Image.open(media_path) as img:
-                img.verify()  # Verify that this is an image
-            return FileResponse(open(media_path, 'rb'))
-        except (IOError, SyntaxError) as e:
-            raise Http404("Media not found")
+    if not os.path.isfile(media_path):
+        raise Http404("Media not found")
+
+    content_type, _ = mimetypes.guess_type(media_path)
+    response = FileResponse(open(media_path, 'rb'), content_type=content_type)
+    if path.startswith('optimized/'):
+        patch_cache_control(response, public=True, max_age=31536000, immutable=True)
     else:
-        raise Http404("Media not found")
+        patch_cache_control(response, public=True, max_age=86400)
+    response['X-Content-Type-Options'] = 'nosniff'
+    return response

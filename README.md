@@ -52,12 +52,16 @@ _This screenshot shows the homepage with shortcuts and blog articles, an article
 ## `.env` Configuration 🛠️
 ```bash
 DJANGO_SECRET_KEY='<your_secret_key>'          # Generate a new secret key
-DJANGO_DEBUG='True'                            # Set to 'False' in production
+DJANGO_DEBUG='False'                           # Use 'True' only for local development
 DJANGO_ALLOWED_HOSTS='<your_domain>,localhost' # Add your domain here (comma-separated values)
+DJANGO_CSRF_TRUSTED_ORIGINS='https://<your_domain>'
 DJANGO_SUPERUSER_USERNAME='<your_username>'    # Create a superuser with these credentials
 DJANGO_SUPERUSER_EMAIL='<your_email>'          # (for accessing the admin interface)
 DJANGO_SUPERUSER_PASSWORD='<your_password>'    # (use a strong password)
 TLS_ACTIVE='True'                              # Set to 'False' to disable HTTPS
+DJANGO_TRUST_PROXY_PROTO='True'                # When a trusted proxy terminates TLS
+DJANGO_SECURE_SSL_REDIRECT='True'              # Redirect HTTP to HTTPS
+DJANGO_SECURE_HSTS_SECONDS='31536000'           # Enable only after HTTPS is verified
 ```
 
 ## Docker 🐳
@@ -77,12 +81,14 @@ services:
       - "8000:8000"
     environment:
       - DJANGO_SECRET_KEY='<your_secret_key>'
-      - DJANGO_DEBUG='True'
+      - DJANGO_DEBUG='False'
       - DJANGO_ALLOWED_HOSTS='<your_domain>,localhost'
       - DJANGO_SUPERUSER_USERNAME='<your_username>'
       - DJANGO_SUPERUSER_EMAIL='<your_email>'
       - DJANGO_SUPERUSER_PASSWORD='<your_password>'
       - TLS_ACTIVE='True'
+      - DJANGO_TRUST_PROXY_PROTO='True'
+      - DJANGO_SECURE_SSL_REDIRECT='True'
     volumes:
         - ./data:/data
         - ./uploads:/uploads
@@ -93,6 +99,10 @@ services:
 
 - **Admin Interface**: The admin interface allows you to manage shortcuts and blog articles. Log in at `/admin` to add shortcuts or create and edit blog articles.
 - **Homepage**: The homepage displays a list of shortcuts and blog articles. Users can access relevant content through the links in the header section.
+
+Uploaded images are converted on demand into cached, responsive WebP sizes. In production,
+serve `/media/` directly from a reverse proxy or object storage when possible; the Django
+fallback includes long-lived caching for generated derivatives.
 
 ## Makefile Commands 🛠️
 

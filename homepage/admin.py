@@ -106,6 +106,12 @@ class ArticleAdmin(ImportExportModelAdmin):
     list_filter = ('category', 'published')
     actions = ['publish_articles']
 
+    def get_queryset(self, request):
+        queryset = super().get_queryset(request)
+        if request.user.is_superuser:
+            return queryset
+        return queryset.filter(authors__user=request.user).distinct()
+
     def view_article_link(self, obj):
         url = f'/article/{obj.identifier}/'
         return format_html('<a href="{}" target="_blank">View Article</a>', url)
@@ -126,6 +132,6 @@ class ArticleAdmin(ImportExportModelAdmin):
         return super().has_change_permission(request, obj)
 
     def has_view_permission(self, request, obj=None):
-        if obj is not None:
-            return True
+        if obj is not None and not request.user.is_superuser:
+            return obj.is_author(request.user)
         return super().has_view_permission(request, obj)

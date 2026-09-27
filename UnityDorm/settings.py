@@ -10,8 +10,10 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 import os
+import secrets
 
 from pathlib import Path
+from django.core.exceptions import ImproperlyConfigured
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,23 +22,50 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'fallback_secret_key')
 DEBUG = os.environ.get('DJANGO_DEBUG', 'true').lower() == 'true'
-ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', 'localhost').split(',')
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
+if not SECRET_KEY:
+    if DEBUG:
+        SECRET_KEY = secrets.token_urlsafe(50)
+    else:
+        raise ImproperlyConfigured('DJANGO_SECRET_KEY must be set when DEBUG is false')
 
-# Required for reverse proxy
-
-ALLOWED_HOSTS.append('0.0.0.0')
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in os.environ.get('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+    if host.strip()
+]
 
 # Security settings
 
-SECURE_BROWSER_XSS_FILTER = True
-TLS_ACTIVE = os.getenv('TLS_ACTIVE', 'true').lower() == 'true'
+TLS_ACTIVE = os.getenv('TLS_ACTIVE', 'false').lower() == 'true'
 protocol = 'https' if TLS_ACTIVE else 'http'
 
-CSRF_TRUSTED_ORIGINS = [f'{protocol}://{host}' for host in ALLOWED_HOSTS if host]
-CORS_ORIGIN_WHITELIST = [f'{protocol}://{host}' for host in ALLOWED_HOSTS if host]
+configured_csrf_origins = os.environ.get('DJANGO_CSRF_TRUSTED_ORIGINS')
+if configured_csrf_origins:
+    CSRF_TRUSTED_ORIGINS = [
+        origin.strip() for origin in configured_csrf_origins.split(',') if origin.strip()
+    ]
+else:
+    CSRF_TRUSTED_ORIGINS = [
+        f'{protocol}://{host}' for host in ALLOWED_HOSTS if '*' not in host
+    ]
+
+SECURE_SSL_REDIRECT = os.getenv('DJANGO_SECURE_SSL_REDIRECT', 'false').lower() == 'true'
+SESSION_COOKIE_SECURE = TLS_ACTIVE
+CSRF_COOKIE_SECURE = TLS_ACTIVE
+SESSION_COOKIE_HTTPONLY = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
+SECURE_CROSS_ORIGIN_OPENER_POLICY = 'same-origin'
+X_FRAME_OPTIONS = 'DENY'
+
+SECURE_HSTS_SECONDS = int(os.getenv('DJANGO_SECURE_HSTS_SECONDS', '0')) if TLS_ACTIVE else 0
+SECURE_HSTS_INCLUDE_SUBDOMAINS = SECURE_HSTS_SECONDS > 0
+SECURE_HSTS_PRELOAD = SECURE_HSTS_SECONDS > 0
+
+if os.getenv('DJANGO_TRUST_PROXY_PROTO', 'false').lower() == 'true':
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 # Application definition
 
@@ -61,9 +90,10 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-
-    'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
+
+if not DEBUG:
+    MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
 
 ROOT_URLCONF = 'UnityDorm.urls'
 
@@ -145,19 +175,24 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STORAGES = {
+    'default': {
+        'BACKEND': 'django.core.files.storage.FileSystemStorage',
+    },
+    'staticfiles': {
+        'BACKEND': (
+            'django.contrib.staticfiles.storage.StaticFilesStorage'
+            if DEBUG
+            else 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+        ),
+    },
+}
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 
-# Additional locations of static files
-if DEBUG:
-    STATICFILES_DIRS = [
-        BASE_DIR / 'static',
-    ]
-    STATIC_ROOT = BASE_DIR / 'staticfiles'
-else:
-    STATICFILES_DIRS = []
-    STATIC_ROOT = BASE_DIR / 'static'
+# Keep source assets separate from collectstatic's generated output.
+STATICFILES_DIRS = [BASE_DIR / 'static']
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Media files
 MEDIA_URL = '/media/'

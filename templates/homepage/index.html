@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static image_tags %}
 
 {% block title %}{{ title }}{% endblock %}
 
@@ -18,11 +18,14 @@
                 <h2>UnityDorm Shortcuts</h2>
             </div>
             {% for shortcut in shortcuts %}
+                {% optimized_image shortcut.image 200 200 as shortcut_image %}
                 <div class="col-md-3 unity-shortcut" id="shortcut-{{ forloop.counter }}" style="background: {{ shortcut.background }}; color: {{ shortcut.color }}"
                      data-shortcut-url="{{ shortcut.url }}" data-shortcut-new-tab="{{ shortcut.new_tab }}">
-                    <img src="{{ shortcut.image.url }}" alt="{{ shortcut.title }}" class="unity-shortcut-image">
+                    {% if shortcut_image.url %}
+                        <img src="{{ shortcut_image.url }}" alt="" class="unity-shortcut-image" width="{{ shortcut_image.width }}" height="{{ shortcut_image.height }}" loading="lazy" decoding="async">
+                    {% endif %}
                     <p class="unity-shortcut-name">{{ shortcut.title }}</p>
-                    <i class="fas fa-external-link-alt link-icon"></i>
+                    <span class="link-icon" aria-hidden="true">↗</span>
                 </div>
             {% endfor %}
         </div>
@@ -36,10 +39,18 @@
 
                     <div class="news-items-wrapper">
                         {% for article in articles %}
+                            {% optimized_image article.image 360 180 as article_image_small %}
+                            {% optimized_image article.image 720 360 as article_image_large %}
                             <div class="news-item-container" data-news-identifier="{{ article.identifier }}">
                                 <div class="unitydorm-news-item">
                                     <span class="news-category" style="background: {{ article.category.background }}; color: {{ article.category.color }}">{{ article.category }}</span>
-                                    <img src="{{ article.image.url }}" alt="{{ article.title }}" class="news-image">
+                                    {% if article_image_small.url %}
+                                        <img src="{{ article_image_small.url }}"
+                                             srcset="{{ article_image_small.url }} {{ article_image_small.width }}w, {{ article_image_large.url }} {{ article_image_large.width }}w"
+                                             sizes="(min-width: 768px) 25vw, 90vw"
+                                             alt="{{ article.title }}" class="news-image"
+                                             width="{{ article_image_small.width }}" height="{{ article_image_small.height }}" loading="lazy" decoding="async">
+                                    {% endif %}
                                     
                                     <h2 class="news-title">{{ article.title }}</h2>
                                     <p class="news-description">{{ article.description }}</p>

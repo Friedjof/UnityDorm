@@ -1,16 +1,12 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static image_tags %}
 
 {% block title %}{{ article.title }}{% endblock %}
 
 {% block extra_head %}
     <link rel="stylesheet" href="{% static 'css/article.css' %}">
-
-    <style>
-        .article-header {
-            background: url("{{ article.image.url }}") no-repeat center center fixed;
-        }
-    </style>
+    {% optimized_image article.image 1280 600 as hero_preload %}
+    {% if hero_preload.url %}<link rel="preload" as="image" href="{{ hero_preload.url }}" fetchpriority="high">{% endif %}
 {% endblock %}
 
 {% block extra_js %}
@@ -18,12 +14,24 @@
 {% endblock %}
 
 {% block content %}
+    {% optimized_image article.image 640 300 as hero_small %}
+    {% optimized_image article.image 1280 600 as hero_medium %}
+    {% optimized_image article.image 1920 900 as hero_large %}
     <div class="article-image-viewer" id="article-image-viewer">
-        <img src="{{ article.image.url }}" alt="{{ article.title }}" class="article-image">
+        {% if hero_large.url %}
+            <img src="{{ hero_large.url }}" alt="{{ article.title }}" class="article-image" width="{{ hero_large.width }}" height="{{ hero_large.height }}" loading="lazy" decoding="async">
+        {% endif %}
     </div>
     <div class="container">
         <div class="row">
             <div class="col-md-8 article-header" id="article-header">
+                {% if hero_small.url %}
+                    <img src="{{ hero_medium.url }}"
+                         srcset="{{ hero_small.url }} {{ hero_small.width }}w, {{ hero_medium.url }} {{ hero_medium.width }}w, {{ hero_large.url }} {{ hero_large.width }}w"
+                         sizes="(min-width: 768px) 67vw, 100vw"
+                         alt="{{ article.title }}" class="article-header-image"
+                         width="{{ hero_medium.width }}" height="{{ hero_medium.height }}" decoding="async" fetchpriority="high">
+                {% endif %}
                 <span class="news-category" style="background: {{ article.category.background }}; color: {{ article.category.color }}">{{ article.category }}</span>
             </div>
             <div class="col-md-8 article-subheader">

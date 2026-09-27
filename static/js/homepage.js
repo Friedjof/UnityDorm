@@ -8,7 +8,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
             if (url) {
                 if (newTab) {
-                    window.open(url, '_blank');
+                    const openedWindow = window.open(url, '_blank', 'noopener,noreferrer');
+                    if (openedWindow) {
+                        openedWindow.opener = null;
+                    }
                 } else {
                     window.location.href = url;
                 }
